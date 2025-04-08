@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - Magic Library</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1><i class="fas fa-book-reader"></i> Magic Library</h1>
+            </div>
+            <ul class="nav-links">
+                <!-- Bu hissə auth.js tərəfindən dinamik olaraq doldurulacaq -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img src="https://via.placeholder.com/150" alt="Profil şəkli" id="profileImage">
+                    <button class="change-avatar" title="Profil şəklini dəyiş">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                <div class="profile-info">
+                    <h2 id="profileName">Yüklənir...</h2>
+                    <p id="profileEmail">Yüklənir...</p>
+                </div>
+            </div>
+
+            <div class="profile-tabs">
+                <button class="tab-button active" data-tab="orders">
+                    <i class="fas fa-shopping-bag"></i> Sifarişlərim
+                </button>
+                <button class="tab-button" data-tab="favorites">
+                    <i class="fas fa-heart"></i> Sevimli Kitablarım
+                </button>
+                <button class="tab-button" data-tab="reviews">
+                    <i class="fas fa-comments"></i> Şərhlərim
+                </button>
+                <button class="tab-button" data-tab="settings">
+                    <i class="fas fa-cog"></i> Tənzimləmələr
+                </button>
+            </div>
+
+            <div id="orders" class="tab-pane active">
+                <div class="no-data">
+                    <i class="fas fa-box-open fa-3x"></i>
+                    <p>Hələ heç bir sifariş etməmisiniz.</p>
+                </div>
+            </div>
+
+            <div id="favorites" class="tab-pane">
+                <div class="no-data">
+                    <i class="fas fa-heart fa-3x"></i>
+                    <p>Hələ heç bir kitabı sevimlilərə əlavə etməmisiniz.</p>
+                </div>
+            </div>
+
+            <div id="reviews" class="tab-pane">
+                <div class="reviews-container">
+                    <div class="no-data">
+                        <i class="fas fa-comments fa-3x"></i>
+                        <p>Hələ heç bir şərh yazmamısınız.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings" class="tab-pane">
+                <form class="settings-form">
+                    <div class="form-group">
+                        <label for="settingsName">İstidaçi adı</label>
+                        <input type="text" id="settingsName" readonly disabled style="background-color: #f5f5f5; cursor: not-allowed;">
+                        <small class="form-text text-muted">İstifadəçi adı dəyişdirilə bilməz</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="settingsEmail">E-poçt</label>
+                        <input type="email" id="settingsEmail" readonly disabled style="background-color: #f5f5f5; cursor: not-allowed;">
+                        <small class="form-text text-muted">E-poçt ünvanı dəyişdirilə bilməz</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="settingsPassword">Yeni Şifrə</label>
+                        <input type="password" id="settingsPassword" placeholder="Şifrəni dəyişmək üçün doldurun">
+                    </div>
+                    <button type="submit" class="save-settings">
+                        <i class="fas fa-save"></i> Yadda Saxla
+                    </button>
+                </form>
+            </div>
+
+            <button class="logout-button" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Çıxış
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <p><b>&copy; 2025 Magic Library designed by Mirfazil Yusifli. Bütün hüquqlar qorunur.</b></p>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        // Profil məlumatlarını yüklə
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('profileName').textContent = user.displayName || 'Ad təyin edilməyib';
+                document.getElementById('profileEmail').textContent = user.email;
+                document.getElementById('settingsName').value = user.displayName || '';
+                document.getElementById('settingsEmail').value = user.email;
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Tab dəyişdirmə
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Aktiv tab və məzmunu təmizlə
+                document.querySelector('.tab-button.active').classList.remove('active');
+                document.querySelector('.tab-pane.active').classList.remove('active');
+                
+                // Yeni tab və məzmunu aktiv et
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Tənzimləmələri yadda saxla
+        document.querySelector('.settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            const newName = document.getElementById('settingsName').value;
+            const newPassword = document.getElementById('settingsPassword').value;
+
+            try {
+                if (newName !== user.displayName) {
+                    await user.updateProfile({
+                        displayName: newName
+                    });
+                }
+
+                if (newPassword) {
+                    await user.updatePassword(newPassword);
+                }
+
+                alert('Tənzimləmələr uğurla yeniləndi!');
+                window.location.reload();
+            } catch (error) {
+                alert('Xəta baş verdi: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axtarış - Magic Library</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <style>
+        .search-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .search-box button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .search-box button:hover {
+            background-color: #45a049;
+        }
+
+        .filter-panel {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .filter-panel.active {
+            display: block;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .genre-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .price-range, .rating-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .price-range input, .rating-range input {
+            width: 100px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .filter-buttons button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .apply-filters {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .clear-filters {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .search-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .book-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .book-card img {
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .book-card h3 {
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .book-card .author {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .book-card .price {
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .book-card .rating {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1><i class="fas fa-book-reader"></i> Magic Library</h1>
+            </div>
+            <div class="search-box-header">
+                <input type="text" id="headerSearchInput" placeholder="Kitab adı, müəllif və ya açar söz...">
+                <button id="headerSearchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Ana Səhifə</a></li>
+                <li><a href="search.html"><i class="fas fa-search"></i> Axtarış</a></li>
+                <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> Səbətim</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> Profilim</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Kitab adı, müəllif və ya açar söz...">
+                <button id="searchButton">
+                    <i class="fas fa-search"></i>
+                    Axtar
+                </button>
+                <button id="filterToggle">
+                    <i class="fas fa-filter"></i>
+                    Filtrlər
+                </button>
+            </div>
+
+            <div class="filter-panel" id="filterPanel">
+                <div class="filter-group">
+                    <h3>Janr</h3>
+                    <div class="genre-options">
+                        <label><input type="checkbox" value="roman"> Roman</label>
+                        <label><input type="checkbox" value="elm"> Elm</label>
+                        <label><input type="checkbox" value="tarix"> Tarix</label>
+                        <label><input type="checkbox" value="usaq"> Uşaq</label>
+                        <label><input type="checkbox" value="felsefe"> Fəlsəfə</label>
+                        <label><input type="checkbox" value="siir"> Şeir</label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>Qiymət Aralığı</h3>
+                    <div class="price-range">
+                        <input type="number" id="minPrice" placeholder="Min">
+                        <span>-</span>
+                        <input type="number" id="maxPrice" placeholder="Max">
+                        <span>AZN</span>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3>Reytinq</h3>
+                    <div class="rating-range">
+                        <input type="number" id="minRating" placeholder="Min" min="0" max="5" step="0.1">
+                        <span>-</span>
+                        <input type="number" id="maxRating" placeholder="Max" min="0" max="5" step="0.1">
+                        <span>⭐</span>
+                    </div>
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="clear-filters" id="clearFilters">Təmizlə</button>
+                    <button class="apply-filters" id="applyFilters">Tətbiq Et</button>
+                </div>
+            </div>
+
+            <div id="searchResultsCount"></div>
+            <div id="searchResults" class="search-results">
+                <!-- Nəticələr JavaScript ilə əlavə olunacaq -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p><b>&copy; 2025 Magic Library designed by Mirfazil Yusifli. Bütün hüquqlar qorunur.</b></p>
+    </footer>
+
+    <script src="search.js"></script>
+</body>
+</html> 

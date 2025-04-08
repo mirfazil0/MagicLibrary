@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Library</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1><i class="fas fa-book-reader"></i> Magic Library</h1>
+            </div>
+            <div class="search-box-header">
+                <input type="text" id="headerSearchInput" placeholder="Kitab adı, müəllif və ya açar söz...">
+                <button id="headerSearchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="active">Ana Səhifə</a></li>
+                <li><a href="search.html"><i class="fas fa-search"></i> Axtarış</a></li>
+                <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> Səbətim</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> Profilim</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Slider Bölməsi -->
+        <section class="slider">
+            <div class="slider-content">
+                <h2>Magic Library</h2>
+                <h3>Ayın Ən Çox Satan Kitablarına 25%-ə qədər endirim!</h3>
+            </div>
+        </section>
+
+        <!-- Çox Satılanlar Bölməsi -->
+        <section class="bestsellers" id="bestsellers">
+            <h2>Ayın Ən Çox Satılanları</h2>
+            <div class="book-grid">
+                <div class="book-card">
+                    <div class="book-header">
+                        <button class="favorite-btn" data-id="1984">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <img src="https://m.media-amazon.com/images/I/418Ug-5U2ML._SY445_SX342_.jpg" alt="1984">
+                    <h3>1984</h3>
+                    <p class="author">George Orwell</p>
+                    <p class="price">15.90 AZN</p>
+                    <div class="rating-info">
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <span class="rating-text">4.0</span>
+                        </div>
+                        <span class="review-count">(125 şərh)</span>
+                    </div>
+                    <button class="add-to-cart" data-id="1984">Səbətə Əlavə Et</button>
+                </div>
+                <div class="book-card">
+                    <div class="book-header">
+                        <button class="favorite-btn" data-id="cinayetceza">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <img src="https://m.media-amazon.com/images/I/91y4Xf0a7pL._SY522_.jpg" alt="Cinayət və Cəza">
+                    <h3>Cinayət və Cəza</h3>
+                    <p class="author">Fyodor Dostoyevski</p>
+                    <p class="price">22.90 AZN</p>
+                    <div class="rating-info">
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="rating-text">4.5</span>
+                        </div>
+                        <span class="review-count">(98 şərh)</span>
+                    </div>
+                    <button class="add-to-cart" data-id="cinayetceza">Səbətə Əlavə Et</button>
+                </div>
+                <div class="book-card">
+                    <div class="book-header">
+                        <button class="favorite-btn" data-id="portaqal">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <img src="https://m.media-amazon.com/images/I/71uaI1psJpL._SY466_.jpg" alt="Portağal Şirinliyi">
+                    <h3>Portağal Şirinliyi</h3>
+                    <p class="author">Jose Mauro De Vasconcelos</p>
+                    <p class="price">12.90 AZN</p>
+                    <div class="rating-info">
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="rating-text">4.3</span>
+                        </div>
+                        <span class="review-count">(87 şərh)</span>
+                    </div>
+                    <button class="add-to-cart" data-id="portaqal">Səbətə Əlavə Et</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bəyənə Biləcəkləriniz Bölməsi -->
+        <section class="recommended" id="recommended">
+            <h2>Bəyənə Biləcəkləriniz</h2>
+            <div class="book-grid">
+                <div class="book-card">
+                    <div class="book-header">
+                        <button class="favorite-btn" data-id="heyvanistan">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <img src="https://m.media-amazon.com/images/I/71je3-DsQEL._SY522_.jpg" alt="Heyvanıstan">
+                    <h3>Heyvanıstan</h3>
+                    <p class="author">George Orwell</p>
+                    <p class="price">14.90 AZN</p>
+                    <div class="rating-info">
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="rating-text">4.6</span>
+                        </div>
+                        <span class="review-count">(142 şərh)</span>
+                    </div>
+                    <button class="add-to-cart" data-id="heyvanistan">Səbətə Əlavə Et</button>
+                </div>
+                <div class="book-card">
+                    <div class="book-header">
+                        <button class="favorite-btn" data-id="elkimyaci">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <img src="https://m.media-amazon.com/images/I/51bDuU2p5zL._SY445_SX342_.jpg" alt="Əlkimyaçı">
+                    <h3>Əlkimyaçı</h3>
+                    <p class="author">Paulo Coelho</p>
+                    <p class="price">16.90 AZN</p>
+                    <div class="rating-info">
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span class="rating-text">4.6</span>
+                        </div>
+                        <span class="review-count">(167 şərh)</span>
+                    </div>
+                    <button class="add-to-cart" data-id="elkimyaci">Səbətə Əlavə Et</button>
+                </div>
+                <div class="book-card">
+                    <div class="book-header">
+                        <button class="favorite-btn" data-id="balacasahzade">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <img src="https://m.media-amazon.com/images/I/71OZY035QKL._SY385_.jpg" alt="Balaca Şahzadə">
+                    <h3>Balaca Şahzadə</h3>
+                    <p class="author">Antoine de Saint-Exupéry</p>
+                    <p class="price">11.90 AZN</p>
+                    <div class="rating-info">
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <span class="rating-text">4.9</span>
+                        </div>
+                        <span class="review-count">(203 şərh)</span>
+                    </div>
+                    <button class="add-to-cart" data-id="balacasahzade">Səbətə Əlavə Et</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Kateqoriyalar -->
+        <section class="book-categories" id="categories">
+            <h2>Kitab Növləri</h2>
+            <div class="category-grid">
+                <a href="category.html?category=roman" class="category-card">
+                    <i class="fas fa-book"></i>
+                    <h3>Roman</h3>
+                </a>
+                <a href="category.html?category=elm" class="category-card">
+                    <i class="fas fa-flask"></i>
+                    <h3>Elm</h3>
+                </a>
+                <a href="category.html?category=tarix" class="category-card">
+                    <i class="fas fa-landmark"></i>
+                    <h3>Tarix</h3>
+                </a>
+                <a href="category.html?category=usaq" class="category-card">
+                    <i class="fas fa-child"></i>
+                    <h3>Uşaq</h3>
+                </a>
+                <a href="category.html?category=felsefe" class="category-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>Fəlsəfə</h3>
+                </a>
+                <a href="category.html?category=siir" class="category-card">
+                    <i class="fas fa-feather"></i>
+                    <h3>Şeir</h3>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p><b>&copy; 2025 Magic Library designed by Mirfazil Yusifli. Bütün hüquqlar qorunur.</b></p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html> 
