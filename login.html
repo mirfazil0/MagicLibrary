@@ -59,6 +59,12 @@
 
             loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
+                
+                // Giriş düyməsini deaktiv et
+                const submitButton = this.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Giriş edilir...';
+
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
 
@@ -66,10 +72,18 @@
                     console.log("Giriş cəhdi:", email);
                     const user = await login(email, password);
                     console.log("Giriş uğurlu, istifadəçi:", user.email);
-                    window.location.href = 'index.html';
+                    
+                    // Əvvəlki səhifəyə qayıt və ya ana səhifəyə yönləndir
+                    const redirectPage = localStorage.getItem('redirectAfterLogin') || 'index.html';
+                    window.location.href = redirectPage;
+                    localStorage.removeItem('redirectAfterLogin');
                 } catch (error) {
                     console.error("Giriş xətası:", error);
                     alert(error.message);
+                } finally {
+                    // Giriş düyməsini yenidən aktiv et
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Daxil Ol';
                 }
             });
 

@@ -9,9 +9,13 @@ const firebaseConfig = {
     measurementId: "G-H31EZNZ4W1"
 };
 
-// Firebase-i başlat
+// Firebase-i başlat və persistance-i aktivləşdir
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch((error) => {
+            console.error("Persistence xətası:", error);
+        });
 }
 
 // Auth instance-ı yarat
@@ -272,41 +276,65 @@ function redirectToLogin(page) {
 }
 
 // Giriş funksiyası
-function login(email, password) {
-    return new Promise((resolve, reject) => {
-        auth.signInWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                // Giriş uğurlu
-                console.log("Giriş uğurlu:", userCredential.user.email);
-                resolve(userCredential.user);
-            })
-            .catch((error) => {
-                console.error("Giriş xətası:", error);
-                let errorMessage = "Giriş zamanı xəta baş verdi.";
-                
-                switch (error.code) {
-                    case "auth/invalid-email":
-                        errorMessage = "Email formatı yanlışdır.";
-                        break;
-                    case "auth/user-disabled":
-                        errorMessage = "Bu hesab deaktiv edilib.";
-                        break;
-                    case "auth/user-not-found":
-                        errorMessage = "Bu email ilə hesab tapılmadı.";
-                        break;
-                    case "auth/wrong-password":
-                        errorMessage = "Şifrə yanlışdır.";
-                        break;
-                    case "auth/network-request-failed":
-                        errorMessage = "İnternet bağlantısı yoxdur.";
-                        break;
-                    default:
-                        errorMessage = error.message;
-                }
-                
-                reject(new Error(errorMessage));
-            });
-    });
+async function login(email, password) {
+    try {
+        console.log("Giriş cəhdi başladı:", email);
+        
+        // Email və şifrəni yoxla
+        if (!email || !password) {
+            throw new Error("Email və şifrə tələb olunur");
+        }
+
+        // Trim email və şifrəni
+        email = email.trim();
+        password = password.trim();
+
+        // Email formatını yoxla
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            throw new Error("Email formatı düzgün deyil");
+        }
+
+        // Firebase ilə giriş
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        console.log("Giriş uğurlu:", userCredential.user.email);
+        
+        // Local storage-ə istifadəçini əlavə et
+        localStorage.setItem('user', JSON.stringify({
+            email: userCredential.user.email,
+            uid: userCredential.user.uid
+        }));
+        
+        return userCredential.user;
+    } catch (error) {
+        console.error("Giriş xətası:", error);
+        let errorMessage = "Giriş zamanı xəta baş verdi.";
+        
+        switch (error.code) {
+            case "auth/invalid-email":
+                errorMessage = "Email formatı düzgün deyil.";
+                break;
+            case "auth/user-disabled":
+                errorMessage = "Bu hesab deaktiv edilib.";
+                break;
+            case "auth/user-not-found":
+                errorMessage = "Bu email ilə hesab tapılmadı.";
+                break;
+            case "auth/wrong-password":
+                errorMessage = "Şifrə yanlışdır.";
+                break;
+            case "auth/network-request-failed":
+                errorMessage = "İnternet bağlantısı yoxdur.";
+                break;
+            case "auth/invalid-credential":
+                errorMessage = "Email və ya şifrə yanlışdır.";
+                break;
+            default:
+                errorMessage = error.message;
+        }
+        
+        throw new Error(errorMessage);
+    }
 }
 
 // Çıxış funksiyası
