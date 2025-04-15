@@ -286,26 +286,43 @@ async function login(email, password) {
         }
 
         // Trim email və şifrəni
-        email = email.trim();
+        email = email.trim().toLowerCase();
         password = password.trim();
 
-        // Email formatını yoxla
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            throw new Error("Email formatı düzgün deyil");
+        // .ru domenli e-poçtlar üçün xüsusi yoxlama
+        if (email.endsWith('@mail.ru')) {
+            console.log(".ru domenli e-poçt aşkarlandı, xüsusi yoxlama başladıldı");
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Kiçik gecikmə
         }
 
         // Firebase ilə giriş
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        console.log("Giriş uğurlu:", userCredential.user.email);
-        
-        // Local storage-ə istifadəçini əlavə et
-        localStorage.setItem('user', JSON.stringify({
-            email: userCredential.user.email,
-            uid: userCredential.user.uid
-        }));
-        
-        return userCredential.user;
+        try {
+            const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+            console.log("Firebase giriş uğurlu:", userCredential.user.email);
+            
+            // Local storage-ə istifadəçini əlavə et
+            const userData = {
+                email: userCredential.user.email,
+                uid: userCredential.user.uid,
+                lastLoginDevice: navigator.userAgent
+            };
+            
+            localStorage.setItem('user', JSON.stringify(userData));
+            
+            return userCredential.user;
+        } catch (firebaseError) {
+            console.error("Firebase xətası:", firebaseError);
+            
+            // .ru domenli e-poçtlar üçün təkrar cəhd
+            if (email.endsWith('@mail.ru') && firebaseError.code === 'auth/invalid-credential') {
+                console.log(".ru domenli e-poçt üçün təkrar cəhd edilir");
+                await new Promise(resolve => setTimeout(resolve, 1500)); // Daha uzun gecikmə
+                
+                return await firebase.auth().signInWithEmailAndPassword(email, password);
+            }
+            
+            throw firebaseError;
+        }
     } catch (error) {
         console.error("Giriş xətası:", error);
         let errorMessage = "Giriş zamanı xəta baş verdi.";
@@ -327,7 +344,12 @@ async function login(email, password) {
                 errorMessage = "İnternet bağlantısı yoxdur.";
                 break;
             case "auth/invalid-credential":
-                errorMessage = "Email və ya şifrə yanlışdır.";
+            case "auth/invalid-login-credentials":
+                if (email.endsWith('@mail.ru')) {
+                    errorMessage = "Mail.ru hesabı ilə giriş zamanı problem yarandı. Zəhmət olmasa bir neçə saniyə gözləyib yenidən cəhd edin.";
+                } else {
+                    errorMessage = "Email və ya şifrə yanlışdır.";
+                }
                 break;
             default:
                 errorMessage = error.message;
