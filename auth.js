@@ -28,13 +28,28 @@ function updateUI(user) {
             // Səbətdəki məhsul sayını hesabla
             const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
             
+            // İstifadəçinin adını təyin et
+            const displayName = user.displayName || user.email.split('@')[0];
+            
             // İstifadəçi daxil olubsa
             authLinks.innerHTML = `
                 <li><a href="index.html">Ana Səhifə</a></li>
                 <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> Səbətim (${cartCount})</a></li>
-                <li><a href="profile.html"><i class="fas fa-user"></i> ${user.displayName || 'Profil'}</a></li>
+                <li><a href="profile.html"><i class="fas fa-user"></i> ${displayName}</a></li>
                 <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Çıxış</a></li>
             `;
+
+            // Profil səhifəsindəki adı yenilə
+            const profileName = document.getElementById('profileName');
+            if (profileName) {
+                profileName.textContent = displayName;
+            }
+
+            // Tənzimləmələr səhifəsindəki adı yenilə
+            const settingsName = document.getElementById('settingsName');
+            if (settingsName) {
+                settingsName.value = displayName;
+            }
 
             // Səbətə əlavə et düyməsini aktiv et
             const addToCartButtons = document.querySelectorAll('.add-to-cart');
@@ -42,7 +57,7 @@ function updateUI(user) {
                 button.onclick = function() {
                     const productId = this.getAttribute('data-id');
                     addToCart(productId);
-                    return false; // Event'i dayandır
+                    return false;
                 };
             });
         } else {
@@ -281,59 +296,26 @@ async function login(email, password) {
             throw new Error("Email və şifrə tələb olunur");
         }
 
-        email = email.trim().toLowerCase();
-        password = password.trim();
+        // Persistence-i LOCAL olaraq təyin et
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-        // Əvvəlcə bütün mövcud sessiyaları təmizlə
-        await auth.signOut();
-        localStorage.clear();
-        sessionStorage.clear();
+        // Giriş et
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-        // mail.ru üçün xüsusi yoxlama
-        if (email.endsWith('@mail.ru')) {
-            // Əvvəlcə email formatını yoxla
-            if (!email.match(/^[a-zA-Z0-9._%+-]+@mail\.ru$/)) {
-                throw new Error("Email formatı düzgün deyil");
-            }
-
-            try {
-                // Birinci cəhd - SESSION persistence
-                await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
-                const result = await auth.signInWithEmailAndPassword(email, password);
-                
-                if (result.user) {
-                    const token = await result.user.getIdToken();
-                    sessionStorage.setItem('authToken', token);
-                    return result.user;
-                }
-            } catch (firstError) {
-                console.error("Birinci cəhd xətası:", firstError);
-                
-                try {
-                    // İkinci cəhd - NONE persistence
-                    await auth.setPersistence(firebase.auth.Auth.Persistence.NONE);
-                    const result = await auth.signInWithEmailAndPassword(email, password);
-                    
-                    if (result.user) {
-                        const token = await result.user.getIdToken();
-                        sessionStorage.setItem('authToken', token);
-                        return result.user;
-                    }
-                } catch (secondError) {
-                    console.error("İkinci cəhd xətası:", secondError);
-                    throw new Error("Mail.ru hesabı ilə giriş zamanı problem yarandı. Zəhmət olmasa bir neçə dəqiqə sonra yenidən cəhd edin.");
-                }
-            }
-        } else {
-            // Digər email domenləri üçün normal giriş
-            await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-            const result = await auth.signInWithEmailAndPassword(email, password);
+        if (user) {
+            // Token al və saxla
+            const token = await user.getIdToken();
+            localStorage.setItem('authToken', token);
             
-            if (result.user) {
-                const token = await result.user.getIdToken();
-                localStorage.setItem('authToken', token);
-                return result.user;
-            }
+            // İstifadəçi məlumatlarını saxla
+            localStorage.setItem('user', JSON.stringify({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || email.split('@')[0]
+            }));
+
+            return user;
         }
     } catch (error) {
         console.error("Giriş xətası:", error);
@@ -355,9 +337,9 @@ async function login(email, password) {
 // Çıxış funksiyası
 async function logout() {
     try {
-        await auth.signOut();
-        localStorage.clear();
-        sessionStorage.clear();
+        await firebase.auth().signOut();
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
         window.location.href = 'index.html';
     } catch (error) {
         console.error("Çıxış xətası:", error);
@@ -365,22 +347,66 @@ async function logout() {
     }
 }
 
-// İstifadəçi vəziyyətini izlə
-auth.onAuthStateChanged((user) => {
+// Auth state dəyişikliyini izlə
+firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-        if (token) {
-            updateUI(user);
-        }
+        // İstifadəçi daxil olubsa
+        console.log('İstifadəçi daxil oldu:', user.email);
+        localStorage.setItem('user', JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || user.email.split('@')[0]
+        }));
+
+        // UI-ı yenilə
+        updateUI(user);
     } else {
+        // İstifadəçi çıxış edibsə
+        console.log('İstifadəçi çıxış etdi');
+        localStorage.removeItem('user');
         updateUI(null);
     }
 });
 
-// Səhifə yükləndikdə UI-ı yenilə
+// Login formu təqdim edildikdə
 document.addEventListener('DOMContentLoaded', () => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const user = await login(email, password);
+                if (user) {
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        });
+    }
+
+    // İstifadəçi məlumatlarını yüklə
+    const user = auth.currentUser || JSON.parse(localStorage.getItem('user'));
     if (user) {
+        // Profil səhifəsindəki elementləri yoxla və yenilə
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const settingsName = document.getElementById('settingsName');
+        const settingsEmail = document.getElementById('settingsEmail');
+
+        // İstifadəçi adını təyin et
+        const displayName = user.displayName || user.email.split('@')[0];
+
+        if (profileName) profileName.textContent = displayName;
+        if (profileEmail) profileEmail.textContent = user.email;
+        if (settingsName) settingsName.value = displayName;
+        if (settingsEmail) settingsEmail.value = user.email;
+
+        // UI-ı yenilə
         updateUI(user);
         updateCartUI();
     }
