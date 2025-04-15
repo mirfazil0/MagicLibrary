@@ -390,16 +390,59 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Hamburger Menü İşlevselliği
     const hamburgerMenu = document.getElementById('hamburgerMenu');
-    const navLinks = document.getElementById('navLinks');
+    const navLinks = document.querySelector('.nav-links');
+    
+    // Overlay elementi yarat
+    const overlay = document.createElement('div');
+    overlay.className = 'menu-overlay';
+    document.body.appendChild(overlay);
 
-    hamburgerMenu.addEventListener('click', function() {
+    // Hamburger menyuya klik
+    hamburgerMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
         navLinks.classList.toggle('active');
+        overlay.classList.toggle('active');
+        
+        // Menyu açıq/bağlı ikonunu dəyiş
+        const icon = this.querySelector('i');
+        if (navLinks.classList.contains('active')) {
+            icon.className = 'fas fa-times';
+        } else {
+            icon.className = 'fas fa-bars';
+        }
     });
 
-    // Menü dışına tıklandığında menüyü kapat
-    document.addEventListener('click', function(event) {
-        if (!navLinks.contains(event.target) && !hamburgerMenu.contains(event.target)) {
+    // Overlay-ə klik
+    overlay.addEventListener('click', function() {
+        navLinks.classList.remove('active');
+        overlay.classList.remove('active');
+        hamburgerMenu.querySelector('i').className = 'fas fa-bars';
+    });
+
+    // Səhifə scroll olduqda menyunu bağla
+    window.addEventListener('scroll', function() {
+        if (navLinks.classList.contains('active')) {
             navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburgerMenu.querySelector('i').className = 'fas fa-bars';
+        }
+    });
+
+    // Menyu linklərinə klik
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', function() {
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburgerMenu.querySelector('i').className = 'fas fa-bars';
+        });
+    });
+
+    // ESC düyməsinə basıldıqda menyunu bağla
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburgerMenu.querySelector('i').className = 'fas fa-bars';
         }
     });
 });
