@@ -277,6 +277,7 @@ function redirectToLogin(page) {
 // Giriş funksiyası
 async function login(email, password) {
     try {
+        // Email və şifrəni yoxla
         if (!email || !password) {
             throw new Error("Email və şifrə tələb olunur");
         }
@@ -284,50 +285,54 @@ async function login(email, password) {
         email = email.trim().toLowerCase();
         password = password.trim();
 
-        // Mövcud istifadəçini çıxış et
-        if (auth.currentUser) {
-            await auth.signOut();
-        }
-
-        // Mobil cihazlar üçün xüsusi konfiqurasiya
-        if (isMobile) {
-            await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
-        } else {
-            await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        }
-
-        // Giriş cəhdi
-        try {
-            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        // mail.ru üçün xüsusi yoxlama
+        if (email.endsWith('@mail.ru')) {
+            // Əvvəlcə mövcud sessiyaları təmizlə
+            await firebase.auth().signOut();
             
-            if (userCredential && userCredential.user) {
-                // İstifadəçi məlumatlarını saxla
-                const userData = {
-                    email: userCredential.user.email,
-                    uid: userCredential.user.uid,
-                    lastLogin: new Date().toISOString(),
-                    isMobile: isMobile
-                };
+            // Persistence-i NONE olaraq təyin et
+            await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
+            
+            try {
+                // İlk giriş cəhdi
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
                 
-                // Local/Session storage istifadəsi
-                if (isMobile) {
+                // Uğurlu giriş
+                if (userCredential && userCredential.user) {
+                    // Yeni token al
+                    const token = await userCredential.user.getIdToken(true);
+                    
+                    // İstifadəçi məlumatlarını saxla
+                    const userData = {
+                        email: userCredential.user.email,
+                        uid: userCredential.user.uid,
+                        token: token,
+                        lastLogin: new Date().toISOString()
+                    };
+                    
+                    // Məlumatları sessionStorage-də saxla
                     sessionStorage.setItem('user', JSON.stringify(userData));
-                } else {
-                    localStorage.setItem('user', JSON.stringify(userData));
+                    
+                    // Persistence-i yenidən LOCAL olaraq təyin et
+                    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                    
+                    return userCredential.user;
                 }
+            } catch (firstError) {
+                console.error("İlk giriş cəhdi xətası:", firstError);
                 
-                return userCredential.user;
+                // İkinci cəhd - fərqli persistence ilə
+                try {
+                    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+                    return await firebase.auth().signInWithEmailAndPassword(email, password);
+                } catch (secondError) {
+                    console.error("İkinci giriş cəhdi xətası:", secondError);
+                    throw secondError;
+                }
             }
-        } catch (authError) {
-            console.error("Auth xətası:", authError);
-            
-            // mail.ru domenləri üçün xüsusi yoxlama
-            if (email.endsWith('@mail.ru')) {
-                // Təkrar cəhd
-                return await auth.signInWithEmailAndPassword(email, password);
-            }
-            
-            throw authError;
+        } else {
+            // mail.ru olmayan hesablar üçün normal giriş
+            return await firebase.auth().signInWithEmailAndPassword(email, password);
         }
     } catch (error) {
         console.error("Giriş xətası:", error);
@@ -345,7 +350,11 @@ async function login(email, password) {
                 break;
             case 'auth/invalid-credential':
             case 'auth/invalid-login-credentials':
-                errorMessage = "Email və ya şifrə yanlışdır.";
+                if (email.endsWith('@mail.ru')) {
+                    errorMessage = "Mail.ru hesabı ilə giriş zamanı problem yarandı. Zəhmət olmasa bir neçə saniyə gözləyib yenidən cəhd edin.";
+                } else {
+                    errorMessage = "Email və ya şifrə yanlışdır.";
+                }
                 break;
             default:
                 errorMessage = "Giriş zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.";
@@ -358,12 +367,10 @@ async function login(email, password) {
 // Çıxış funksiyası
 async function logout() {
     try {
-        await auth.signOut();
-        if (isMobile) {
-            sessionStorage.removeItem('user');
-        } else {
-            localStorage.removeItem('user');
-        }
+        await firebase.auth().signOut();
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
+        localStorage.removeItem('cart');
         window.location.href = 'index.html';
     } catch (error) {
         console.error("Çıxış xətası:", error);
@@ -374,10 +381,8 @@ async function logout() {
 // İstifadəçi vəziyyətini izlə
 auth.onAuthStateChanged((user) => {
     if (user) {
-        const userData = isMobile ? 
-            JSON.parse(sessionStorage.getItem('user')) : 
-            JSON.parse(localStorage.getItem('user'));
-            
+        // Həm localStorage həm də sessionStorage-dən yoxla
+        const userData = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user'));
         if (userData) {
             updateUI(user);
         }
