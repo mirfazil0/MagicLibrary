@@ -148,7 +148,7 @@ function updateCartUI() {
                 <span>${total.toFixed(2)} AZN</span>
             </div>
         </div>
-        <button class="checkout-button">
+        <button class="checkout-button" onclick="startCheckout()">
             <i class="fas fa-lock"></i> Sifarişi rəsmiləşdir
         </button>
         <a href="index.html" class="continue-shopping">
@@ -633,4 +633,152 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sevimlilər bölməsini yenilə
     updateFavoritesUI();
-}); 
+});
+
+// Sifarişi rəsmiləşdirmə funksiyası
+async function startCheckout() {
+    const user = auth.currentUser;
+    if (!user) {
+        alert('Sifariş vermək üçün daxil olmalısınız!');
+        redirectToLogin('cart');
+        return;
+    }
+
+    try {
+        // Səbəti yoxla
+        if (cart.length === 0) {
+            alert('Səbətiniz boşdur!');
+            return;
+        }
+
+        // Ümumi məbləği hesabla
+        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Ödəniş formasını göstər
+        const checkoutForm = document.createElement('div');
+        checkoutForm.className = 'checkout-form';
+        checkoutForm.innerHTML = `
+            <div class="checkout-overlay">
+                <div class="checkout-modal">
+                    <h3>Ödəniş Məlumatları</h3>
+                    <form id="paymentForm">
+                        <div class="form-group">
+                            <label>Kart Nömrəsi</label>
+                            <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Bitmə Tarixi</label>
+                                <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="form-group">
+                                <label>CVV</label>
+                                <input type="text" id="cvv" placeholder="123" maxlength="3" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Kartın Üzərindəki Ad</label>
+                            <input type="text" id="cardName" placeholder="AD SOYAD" required>
+                        </div>
+                        <div class="total-amount">
+                            <span>Ödəniləcək Məbləğ:</span>
+                            <span>${total.toFixed(2)} AZN</span>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" onclick="closeCheckout()" class="cancel-button">İmtina</button>
+                            <button type="submit" class="confirm-button">Təsdiqlə</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(checkoutForm);
+
+        // Kart nömrəsi formatlaması
+        const cardNumber = document.getElementById('cardNumber');
+        cardNumber.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{4})/g, '$1 ').trim();
+            e.target.value = value;
+        });
+
+        // Bitmə tarixi formatlaması
+        const expiryDate = document.getElementById('expiryDate');
+        expiryDate.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0,2) + '/' + value.slice(2);
+            }
+            e.target.value = value;
+        });
+
+        // Ödəniş formasını işlə
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                // Ödənişi emal et
+                await processPayment();
+                
+                // Sifarişi yadda saxla
+                const orderId = await saveOrder();
+                
+                // Səbəti təmizlə
+                cart = [];
+                localStorage.setItem('cart', JSON.stringify(cart));
+                
+                // Uğurlu mesaj göstər
+                alert('Sifarişiniz uğurla qeydə alındı! Sifariş nömrəniz: ' + orderId);
+                
+                // Səhifəni yenilə
+                window.location.href = 'profile.html';
+            } catch (error) {
+                alert('Ödəniş zamanı xəta baş verdi: ' + error.message);
+            }
+        });
+
+    } catch (error) {
+        console.error('Ödəniş xətası:', error);
+        alert('Ödəniş zamanı xəta baş verdi. Zəhmət olmasa bir az sonra yenidən cəhd edin.');
+    }
+}
+
+// Ödənişi emal et
+async function processPayment() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, 2000);
+    });
+}
+
+// Sifarişi yadda saxla
+async function saveOrder() {
+    const user = auth.currentUser;
+    const orderId = 'ORD' + Date.now();
+    
+    const order = {
+        id: orderId,
+        userId: user.uid,
+        items: cart,
+        total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        status: 'Gözləmədə',
+        createdAt: new Date().toISOString()
+    };
+
+    // Sifarişi localStorage-də saxla
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+    orders.push(order);
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    return orderId;
+}
+
+// Ödəniş pəncərəsini bağla
+function closeCheckout() {
+    const checkoutForm = document.querySelector('.checkout-form');
+    if (checkoutForm) {
+        checkoutForm.remove();
+    }
+} 

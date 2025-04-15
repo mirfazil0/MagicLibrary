@@ -2133,4 +2133,135 @@ main {
     .category-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Ödəniş Forması */
+.checkout-form {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.checkout-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.checkout-modal {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.checkout-modal h3 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.checkout-modal .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.checkout-modal .form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.checkout-modal .form-row .form-group {
+    flex: 1;
+}
+
+.checkout-modal label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.checkout-modal input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #e1e1e1;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.checkout-modal input:focus {
+    border-color: #2575fc;
+    outline: none;
+}
+
+.total-amount {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.cancel-button,
+.confirm-button {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.cancel-button {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #c0392b;
+}
+
+.confirm-button {
+    background-color: #27ae60;
+    color: white;
+}
+
+.confirm-button:hover {
+    background-color: #219a52;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .checkout-modal {
+        padding: 1rem;
+    }
+
+    .checkout-modal .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
 } 
