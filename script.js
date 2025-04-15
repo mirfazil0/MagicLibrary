@@ -387,6 +387,21 @@ document.addEventListener('DOMContentLoaded', function() {
             updateCartCount();
         };
     }
+
+    // Hamburger Menü İşlevselliği
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
+    const navLinks = document.getElementById('navLinks');
+
+    hamburgerMenu.addEventListener('click', function() {
+        navLinks.classList.toggle('active');
+    });
+
+    // Menü dışına tıklandığında menüyü kapat
+    document.addEventListener('click', function(event) {
+        if (!navLinks.contains(event.target) && !hamburgerMenu.contains(event.target)) {
+            navLinks.classList.remove('active');
+        }
+    });
 });
 
 // Səbət sayını yeniləmə
