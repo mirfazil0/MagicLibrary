@@ -9,17 +9,16 @@ const firebaseConfig = {
     measurementId: "G-H31EZNZ4W1"
 };
 
-// Firebase-i başlat və persistance-i aktivləşdir
+// Firebase-i başlat
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .catch((error) => {
-            console.error("Persistence xətası:", error);
-        });
 }
 
 // Auth instance-ı yarat
 const auth = firebase.auth();
+
+// Mobil cihaz yoxlaması
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 // İstifadəçi interfeysi yeniləmə funksiyası
 function updateUI(user) {
@@ -278,81 +277,78 @@ function redirectToLogin(page) {
 // Giriş funksiyası
 async function login(email, password) {
     try {
-        console.log("Giriş cəhdi başladı:", email);
-        
-        // Email və şifrəni yoxla
         if (!email || !password) {
             throw new Error("Email və şifrə tələb olunur");
         }
 
-        // Trim email və şifrəni
         email = email.trim().toLowerCase();
         password = password.trim();
 
-        // .ru domenli e-poçtlar üçün xüsusi yoxlama
-        if (email.endsWith('@mail.ru')) {
-            console.log(".ru domenli e-poçt aşkarlandı, xüsusi yoxlama başladıldı");
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Kiçik gecikmə
+        // Mövcud istifadəçini çıxış et
+        if (auth.currentUser) {
+            await auth.signOut();
         }
 
-        // Firebase ilə giriş
+        // Mobil cihazlar üçün xüsusi konfiqurasiya
+        if (isMobile) {
+            await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+        } else {
+            await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        }
+
+        // Giriş cəhdi
         try {
-            const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
-            console.log("Firebase giriş uğurlu:", userCredential.user.email);
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
             
-            // Local storage-ə istifadəçini əlavə et
-            const userData = {
-                email: userCredential.user.email,
-                uid: userCredential.user.uid,
-                lastLoginDevice: navigator.userAgent
-            };
-            
-            localStorage.setItem('user', JSON.stringify(userData));
-            
-            return userCredential.user;
-        } catch (firebaseError) {
-            console.error("Firebase xətası:", firebaseError);
-            
-            // .ru domenli e-poçtlar üçün təkrar cəhd
-            if (email.endsWith('@mail.ru') && firebaseError.code === 'auth/invalid-credential') {
-                console.log(".ru domenli e-poçt üçün təkrar cəhd edilir");
-                await new Promise(resolve => setTimeout(resolve, 1500)); // Daha uzun gecikmə
+            if (userCredential && userCredential.user) {
+                // İstifadəçi məlumatlarını saxla
+                const userData = {
+                    email: userCredential.user.email,
+                    uid: userCredential.user.uid,
+                    lastLogin: new Date().toISOString(),
+                    isMobile: isMobile
+                };
                 
-                return await firebase.auth().signInWithEmailAndPassword(email, password);
+                // Local/Session storage istifadəsi
+                if (isMobile) {
+                    sessionStorage.setItem('user', JSON.stringify(userData));
+                } else {
+                    localStorage.setItem('user', JSON.stringify(userData));
+                }
+                
+                return userCredential.user;
+            }
+        } catch (authError) {
+            console.error("Auth xətası:", authError);
+            
+            // mail.ru domenləri üçün xüsusi yoxlama
+            if (email.endsWith('@mail.ru')) {
+                // Təkrar cəhd
+                return await auth.signInWithEmailAndPassword(email, password);
             }
             
-            throw firebaseError;
+            throw authError;
         }
     } catch (error) {
         console.error("Giriş xətası:", error);
-        let errorMessage = "Giriş zamanı xəta baş verdi.";
         
+        let errorMessage;
         switch (error.code) {
-            case "auth/invalid-email":
-                errorMessage = "Email formatı düzgün deyil.";
+            case 'auth/network-request-failed':
+                errorMessage = "İnternet bağlantısı zəifdir. Zəhmət olmasa bağlantınızı yoxlayın.";
                 break;
-            case "auth/user-disabled":
+            case 'auth/too-many-requests':
+                errorMessage = "Həddindən artıq cəhd edildi. Bir neçə dəqiqə sonra yenidən cəhd edin.";
+                break;
+            case 'auth/user-disabled':
                 errorMessage = "Bu hesab deaktiv edilib.";
                 break;
-            case "auth/user-not-found":
-                errorMessage = "Bu email ilə hesab tapılmadı.";
-                break;
-            case "auth/wrong-password":
-                errorMessage = "Şifrə yanlışdır.";
-                break;
-            case "auth/network-request-failed":
-                errorMessage = "İnternet bağlantısı yoxdur.";
-                break;
-            case "auth/invalid-credential":
-            case "auth/invalid-login-credentials":
-                if (email.endsWith('@mail.ru')) {
-                    errorMessage = "Mail.ru hesabı ilə giriş zamanı problem yarandı. Zəhmət olmasa bir neçə saniyə gözləyib yenidən cəhd edin.";
-                } else {
-                    errorMessage = "Email və ya şifrə yanlışdır.";
-                }
+            case 'auth/invalid-credential':
+            case 'auth/invalid-login-credentials':
+                errorMessage = "Email və ya şifrə yanlışdır.";
                 break;
             default:
-                errorMessage = error.message;
+                errorMessage = "Giriş zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.";
         }
         
         throw new Error(errorMessage);
@@ -360,24 +356,31 @@ async function login(email, password) {
 }
 
 // Çıxış funksiyası
-function logout() {
-    return auth.signOut()
-        .then(() => {
-            // Çıxış uğurlu
-            localStorage.removeItem('cart');
-            window.location.href = 'index.html';
-        })
-        .catch((error) => {
-            console.error("Çıxış xətası:", error);
-            alert("Çıxış zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.");
-        });
+async function logout() {
+    try {
+        await auth.signOut();
+        if (isMobile) {
+            sessionStorage.removeItem('user');
+        } else {
+            localStorage.removeItem('user');
+        }
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error("Çıxış xətası:", error);
+        alert("Çıxış zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.");
+    }
 }
 
 // İstifadəçi vəziyyətini izlə
 auth.onAuthStateChanged((user) => {
-    console.log("Auth state dəyişdi:", user ? user.email : "İstifadəçi çıxıb");
     if (user) {
-        updateUI(user);
+        const userData = isMobile ? 
+            JSON.parse(sessionStorage.getItem('user')) : 
+            JSON.parse(localStorage.getItem('user'));
+            
+        if (userData) {
+            updateUI(user);
+        }
     } else {
         updateUI(null);
     }
