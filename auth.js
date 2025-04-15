@@ -3,14 +3,18 @@ const firebaseConfig = {
     apiKey: "AIzaSyDrDx58dmssfeBLkPwCGcPbmdKVYUdC378",
     authDomain: "magiclibrary-7bd11.firebaseapp.com",
     projectId: "magiclibrary-7bd11",
-    storageBucket: "magiclibrary-7bd11.firebasestorage.app",
+    storageBucket: "magiclibrary-7bd11.appspot.com",
     messagingSenderId: "822171231091",
     appId: "1:822171231091:web:a9cf3ddf08c304c2e4db06",
     measurementId: "G-H31EZNZ4W1"
 };
 
 // Firebase-i başlat
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+// Auth instance-ı yarat
 const auth = firebase.auth();
 
 // İstifadəçi interfeysi yeniləmə funksiyası
@@ -267,137 +271,67 @@ function redirectToLogin(page) {
     return false;
 }
 
-// Giriş formu əməliyyatları
-const loginForm = document.getElementById('loginForm');
-if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        try {
-            console.log('Giriş cəhdi:', email);
-            const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            console.log('Giriş uğurlu:', userCredential.user);
-            localStorage.setItem('user', JSON.stringify(userCredential.user));
-            updateUI(userCredential.user);
-            window.location.href = 'index.html';
-        } catch (error) {
-            console.error('Giriş xətası:', error);
-            let errorMessage = 'Giriş uğursuz oldu: ';
-            switch (error.code) {
-                case 'auth/invalid-email':
-                    errorMessage += 'Yanlış e-poçt formatı.';
-                    break;
-                case 'auth/user-not-found':
-                    errorMessage += 'Bu e-poçt ünvanı ilə hesab tapılmadı.';
-                    break;
-                case 'auth/wrong-password':
-                    errorMessage += 'Yanlış şifrə.';
-                    break;
-                case 'auth/invalid-credential':
-                    errorMessage += 'E-poçt və ya şifrə yanlışdır.';
-                    break;
-                default:
-                    errorMessage += error.message;
-            }
-            alert(errorMessage);
-        }
-    });
-}
-
-// Qeydiyyat formu əməliyyatları
-const registerForm = document.getElementById('registerForm');
-if (registerForm) {
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value.toLowerCase();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-
-        if (password !== confirmPassword) {
-            alert('Şifrələr uyğun gəlmir!');
-            return;
-        }
-
-        try {
-            // İstifadəçi adı validasiyası
-            if (!/^[a-z][a-z0-9]*$/.test(username)) {
-                throw new Error('İstifadəçi adı yalnız kiçik hərflər və rəqəmlərdən ibarət ola bilər və hərflə başlamalıdır.');
-            }
-
-            console.log('Qeydiyyat cəhdi:', email);
-            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-            console.log('Qeydiyyat uğurlu:', userCredential.user);
-            
-            // İstifadəçi profilini yenilə
-            await userCredential.user.updateProfile({
-                displayName: username
+// Giriş funksiyası
+function login(email, password) {
+    return new Promise((resolve, reject) => {
+        auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Giriş uğurlu
+                console.log("Giriş uğurlu:", userCredential.user.email);
+                resolve(userCredential.user);
+            })
+            .catch((error) => {
+                console.error("Giriş xətası:", error);
+                let errorMessage = "Giriş zamanı xəta baş verdi.";
+                
+                switch (error.code) {
+                    case "auth/invalid-email":
+                        errorMessage = "Email formatı yanlışdır.";
+                        break;
+                    case "auth/user-disabled":
+                        errorMessage = "Bu hesab deaktiv edilib.";
+                        break;
+                    case "auth/user-not-found":
+                        errorMessage = "Bu email ilə hesab tapılmadı.";
+                        break;
+                    case "auth/wrong-password":
+                        errorMessage = "Şifrə yanlışdır.";
+                        break;
+                    case "auth/network-request-failed":
+                        errorMessage = "İnternet bağlantısı yoxdur.";
+                        break;
+                    default:
+                        errorMessage = error.message;
+                }
+                
+                reject(new Error(errorMessage));
             });
-
-            // E-poçt təsdiqi göndər
-            await userCredential.user.sendEmailVerification();
-            alert('Qeydiyyat uğurla tamamlandı! Zəhmət olmasa e-poçt ünvanınızı təsdiqləyin.');
-            window.location.href = 'login.html';
-        } catch (error) {
-            console.error('Qeydiyyat xətası:', error);
-            alert(error.message);
-        }
     });
 }
 
-// Şifrə sıfırlama əməliyyatları
-const forgotPasswordLink = document.getElementById('forgotPassword');
-if (forgotPasswordLink) {
-    forgotPasswordLink.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const email = prompt('Zəhmət olmasa hesabınızın e-poçt ünvanını daxil edin:');
-        
-        if (email) {
-            try {
-                await auth.sendPasswordResetEmail(email);
-                alert('Şifrə sıfırlama linki e-poçt ünvanınıza göndərildi.');
-            } catch (error) {
-                alert('Şifrə sıfırlama uğursuz oldu: ' + error.message);
-            }
-        }
-    });
+// Çıxış funksiyası
+function logout() {
+    return auth.signOut()
+        .then(() => {
+            // Çıxış uğurlu
+            localStorage.removeItem('cart');
+            window.location.href = 'index.html';
+        })
+        .catch((error) => {
+            console.error("Çıxış xətası:", error);
+            alert("Çıxış zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.");
+        });
 }
 
-// Sessiya vəziyyətinin yoxlanması
+// İstifadəçi vəziyyətini izlə
 auth.onAuthStateChanged((user) => {
+    console.log("Auth state dəyişdi:", user ? user.email : "İstifadəçi çıxıb");
     if (user) {
-        // İstifadəçi daxil olub
-        localStorage.setItem('user', JSON.stringify(user));
         updateUI(user);
-        updateCartUI();
-
-        // Səbət səhifəsində olub-olmadığını yoxla
-        if (window.location.pathname.includes('cart.html')) {
-            document.querySelector('.cart-container').style.display = 'block';
-        }
     } else {
-        // İstifadəçi daxil olmayıb
-        localStorage.removeItem('user');
         updateUI(null);
-
-        // Səbət səhifəsində olub-olmadığını yoxla
-        if (window.location.pathname.includes('cart.html')) {
-            redirectToLogin('cart');
-        }
     }
 });
-
-// Çıxış əməliyyatı
-function logout() {
-    auth.signOut().then(() => {
-        updateUI(null);
-        window.location.href = 'login.html';
-    }).catch((error) => {
-        alert('Çıxış zamanı xəta baş verdi: ' + error.message);
-    });
-}
 
 // Səhifə yükləndikdə UI-ı yenilə
 document.addEventListener('DOMContentLoaded', () => {
