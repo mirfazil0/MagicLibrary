@@ -1716,6 +1716,33 @@ main {
         transform: translateY(0);
         transition: transform 0.3s ease-in-out;
     }
+
+    .search-toggle {
+        position: absolute;
+        right: 60px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px;
+        margin-right: 5px;
+    }
+
+    .hamburger-menu {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+    }
 }
 
 /* Hamburger menyu aktiv olduqda arxa fon */

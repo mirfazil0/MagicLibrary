@@ -277,82 +277,134 @@ function performSearch() {
         book.rating <= currentFilters.maxRating
     );
 
-    displayResults(filteredBooks);
+    displaySearchResults(filteredBooks);
 }
 
-// Nəticələri göstər
-function displayResults(books) {
-    if (!searchResultsCount || !searchResults) return;
-    
-    searchResultsCount.textContent = `${books.length} kitab tapıldı`;
-    
-    if (books.length === 0) {
-        searchResults.innerHTML = `
-            <div class="no-results">
-                <i class="fas fa-book-open"></i>
-                <p>Heç bir kitab tapılmadı.</p>
-            </div>
-        `;
+function displaySearchResults(books) {
+    const searchResults = document.getElementById('searchResults');
+    const template = document.getElementById('bookCardTemplate');
+    searchResults.innerHTML = '';
+
+    books.forEach(book => {
+        const bookCard = template.content.cloneNode(true);
+        
+        // Kitab məlumatlarını doldur
+        bookCard.querySelector('.book-image').src = book.imageUrl;
+        bookCard.querySelector('.book-image').alt = book.title;
+        bookCard.querySelector('.book-title').textContent = book.title;
+        bookCard.querySelector('.book-author').textContent = book.author;
+        bookCard.querySelector('.book-rating').innerHTML = generateStars(book.rating);
+        bookCard.querySelector('.book-price').textContent = `${book.price} AZN`;
+
+        // Düymələrə ID-ləri əlavə et
+        const favoriteBtn = bookCard.querySelector('.favorite-btn');
+        const cartBtn = bookCard.querySelector('.add-to-cart-btn');
+        favoriteBtn.dataset.id = book.id;
+        cartBtn.dataset.id = book.id;
+
+        // Favoritlərdə olub-olmadığını yoxla
+        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        if (favorites.includes(book.id)) {
+            favoriteBtn.querySelector('i').classList.remove('far');
+            favoriteBtn.querySelector('i').classList.add('fas');
+        }
+
+        // Hadisə dinləyicilərini əlavə et
+        favoriteBtn.addEventListener('click', () => toggleFavorite(book.id));
+        cartBtn.addEventListener('click', () => addToCart(book.id));
+
+        searchResults.appendChild(bookCard);
+    });
+
+    // Nəticələrin sayını göstər
+    const countElement = document.getElementById('searchResultsCount');
+    countElement.textContent = `${books.length} kitab tapıldı`;
+}
+
+// Sevimlilərə əlavə et funksiyası
+function toggleFavorite(bookId, user) {
+    if (!user) {
+        alert('Zəhmət olmasa əvvəlcə daxil olun');
         return;
     }
 
-    let html = '';
-    books.forEach(book => {
-        html += `
-            <div class="book-card">
-                <div class="book-header">
-                    <button class="favorite-btn" data-id="${book.id}">
-                        <i class="far fa-heart"></i>
-                    </button>
-                </div>
-                <img src="${book.image}" alt="${book.title}">
-                <h3>${book.title}</h3>
-                <p class="author">${book.author}</p>
-                <div class="price-info">
-                    <p class="price">${book.price.toFixed(2)} AZN</p>
-                    ${book.oldPrice ? `<p class="old-price">${book.oldPrice.toFixed(2)} AZN</p>` : ''}
-                </div>
-                <div class="rating-info">
-                    <div class="rating">
-                        ${generateStars(book.rating)}
-                        <span class="rating-text">${book.rating}</span>
-                    </div>
-                    <span class="review-count">(${book.reviewCount} şərh)</span>
-                </div>
-                <button class="add-to-cart" data-id="${book.id}">Səbətə Əlavə Et</button>
-            </div>
-        `;
-    });
+    const button = document.querySelector(`.favorite-btn[data-id="${bookId}"]`);
+    if (!button) return;
 
-    searchResults.innerHTML = html;
+    const icon = button.querySelector('i');
+    const isFavorite = icon.classList.contains('fas');
 
-    // Sevimlilər və səbət düymələrinə click hadisələrini əlavə et
-    const favoriteButtons = searchResults.querySelectorAll('.favorite-btn');
-    const addToCartButtons = searchResults.querySelectorAll('.add-to-cart');
+    if (isFavorite) {
+        // Sevimlilərdən çıxar
+        window.favorites = window.favorites.filter(id => id !== bookId);
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+    } else {
+        // Sevimlilərə əlavə et
+        if (!window.favorites.includes(bookId)) {
+            window.favorites.push(bookId);
+        }
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+    }
+
+    // Local storage-də yadda saxla
+    localStorage.setItem('favorites', JSON.stringify(window.favorites));
+}
+
+// Səbətə əlavə et funksiyası
+function addToCart(bookId) {
+    const book = window.books.find(b => b.id === bookId);
+    if (!book) return;
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingItem = cart.find(item => item.id === bookId);
+
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            id: book.id,
+            title: book.title,
+            price: book.price,
+            image: book.image,
+            quantity: 1
+        });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    showNotification('Kitab səbətə əlavə edildi!');
+}
+
+// Bildiriş göstər
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'cart-notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Sevimlilər UI-ni yenilə
+function updateFavoritesUI() {
+    window.favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    const favoriteButtons = document.querySelectorAll('.favorite-btn');
 
     favoriteButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const bookId = button.getAttribute('data-id');
-            toggleFavorite(bookId, firebase.auth().currentUser);
-        });
+        const bookId = button.getAttribute('data-id');
+        const icon = button.querySelector('i');
+        
+        if (window.favorites.includes(bookId)) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+        }
     });
-
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const bookId = button.getAttribute('data-id');
-            addToCart(bookId);
-        });
-    });
-
-    // Mövcud sevimlilər və səbət vəziyyətini yenilə
-    updateFavoritesUI();
-    
-    // Axtarış inputunu təmizlə
-    if (searchInput) {
-        searchInput.value = '';
-        currentFilters.query = '';
-    }
 }
 
 // Ulduzları generasiya et

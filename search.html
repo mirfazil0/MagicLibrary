@@ -246,7 +246,26 @@
 
             <div id="searchResultsCount"></div>
             <div id="searchResults" class="search-results">
-                <!-- Nəticələr JavaScript ilə əlavə olunacaq -->
+                <!-- Axtarış nəticələri şablonu -->
+                <template id="bookCardTemplate">
+                    <div class="book-card">
+                        <img src="" alt="" class="book-image">
+                        <div class="book-info">
+                            <h3 class="book-title"></h3>
+                            <p class="book-author"></p>
+                            <div class="book-rating"></div>
+                            <p class="book-price"></p>
+                            <div class="book-actions">
+                                <button class="favorite-btn" data-id="">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <button class="add-to-cart-btn" data-id="">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
         </div>
     </main>
