@@ -9,6 +9,11 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <style>
+        /* Üst hissədəki axtarış çubuğunu gizlət */
+        .search-box-header {
+            display: none !important;
+        }
+        
         .search-container {
             max-width: 800px;
             margin: 20px auto;
@@ -111,7 +116,7 @@
 
         .search-results {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 20px;
             padding: 20px 0;
         }
@@ -122,6 +127,8 @@
             padding: 10px;
             text-align: center;
             transition: transform 0.2s;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .book-card:hover {
@@ -130,9 +137,12 @@
         }
 
         .book-card img {
-            max-width: 150px;
+            width: 100%;
+            max-width: 200px;
             height: auto;
             margin-bottom: 10px;
+            object-fit: cover;
+            border-radius: 4px;
         }
 
         .book-card h3 {
@@ -157,6 +167,76 @@
             margin-bottom: 10px;
         }
 
+        .book-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #666;
+            transition: color 0.3s;
+        }
+
+        .favorite-btn:hover {
+            color: #ff4757;
+        }
+
+        .favorite-btn i.fas {
+            color: #ff4757;
+        }
+
+        .add-to-cart {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .add-to-cart:hover {
+            background-color: #45a049;
+        }
+
+        .rating-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .rating-text {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .review-count {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .price-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .old-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9em;
+        }
+
         .no-results {
             text-align: center;
             padding: 50px;
@@ -176,15 +256,9 @@
             <div class="logo">
                 <h1><i class="fas fa-book-reader"></i> Magic Library</h1>
             </div>
-            <div class="search-box-header">
-                <input type="text" id="headerSearchInput" placeholder="Kitab adı, müəllif və ya açar söz...">
-                <button id="headerSearchButton">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
             <ul class="nav-links" id="navLinks">
                 <li><a href="index.html">Ana Səhifə</a></li>
-                <li><a href="search.html"><i class="fas fa-search"></i> Axtarış</a></li>
+                <li><a href="search.html" class="active"><i class="fas fa-search"></i> Axtarış</a></li>
                 <li><a href="cart.html"><i class="fas fa-shopping-cart"></i> Səbətim</a></li>
                 <li><a href="profile.html"><i class="fas fa-user"></i> Profilim</a></li>
             </ul>
