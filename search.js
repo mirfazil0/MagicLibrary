@@ -285,12 +285,24 @@ function displaySearchResults(books) {
     const template = document.getElementById('bookCardTemplate');
     searchResults.innerHTML = '';
 
+    if (!books || books.length === 0) {
+        searchResults.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-book-open"></i>
+                <p>Heç bir kitab tapılmadı.</p>
+            </div>
+        `;
+        return;
+    }
+
     books.forEach(book => {
         const bookCard = template.content.cloneNode(true);
         
         // Kitab məlumatlarını doldur
-        bookCard.querySelector('.book-image').src = book.imageUrl;
-        bookCard.querySelector('.book-image').alt = book.title;
+        const img = bookCard.querySelector('.book-image');
+        img.src = book.imageUrl || 'default-book.jpg';
+        img.alt = book.title;
+        
         bookCard.querySelector('.book-title').textContent = book.title;
         bookCard.querySelector('.book-author').textContent = book.author;
         bookCard.querySelector('.book-rating').innerHTML = generateStars(book.rating);
@@ -318,13 +330,16 @@ function displaySearchResults(books) {
 
     // Nəticələrin sayını göstər
     const countElement = document.getElementById('searchResultsCount');
-    countElement.textContent = `${books.length} kitab tapıldı`;
+    if (countElement) {
+        countElement.textContent = `${books.length} kitab tapıldı`;
+    }
 }
 
 // Sevimlilərə əlavə et funksiyası
-function toggleFavorite(bookId, user) {
+function toggleFavorite(bookId) {
+    const user = firebase.auth().currentUser;
     if (!user) {
-        alert('Zəhmət olmasa əvvəlcə daxil olun');
+        window.location.href = 'login.html';
         return;
     }
 
@@ -333,31 +348,41 @@ function toggleFavorite(bookId, user) {
 
     const icon = button.querySelector('i');
     const isFavorite = icon.classList.contains('fas');
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 
     if (isFavorite) {
         // Sevimlilərdən çıxar
-        window.favorites = window.favorites.filter(id => id !== bookId);
+        const index = favorites.indexOf(bookId);
+        if (index > -1) {
+            favorites.splice(index, 1);
+        }
         icon.classList.remove('fas');
         icon.classList.add('far');
     } else {
         // Sevimlilərə əlavə et
-        if (!window.favorites.includes(bookId)) {
-            window.favorites.push(bookId);
+        if (!favorites.includes(bookId)) {
+            favorites.push(bookId);
         }
         icon.classList.remove('far');
         icon.classList.add('fas');
     }
 
-    // Local storage-də yadda saxla
-    localStorage.setItem('favorites', JSON.stringify(window.favorites));
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    showNotification(isFavorite ? 'Kitab sevimlilərdən çıxarıldı!' : 'Kitab sevimlilərə əlavə edildi!');
 }
 
 // Səbətə əlavə et funksiyası
 function addToCart(bookId) {
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        window.location.href = 'login.html';
+        return;
+    }
+
     const book = window.books.find(b => b.id === bookId);
     if (!book) return;
 
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItem = cart.find(item => item.id === bookId);
 
     if (existingItem) {
@@ -367,7 +392,7 @@ function addToCart(bookId) {
             id: book.id,
             title: book.title,
             price: book.price,
-            image: book.image,
+            imageUrl: book.imageUrl,
             quantity: 1
         });
     }

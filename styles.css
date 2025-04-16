@@ -1719,8 +1719,8 @@ main {
 
     .search-toggle {
         position: absolute;
-        right: 60px;
-        top: 50%;
+        right: 80px;
+        top: 55%;
         transform: translateY(-50%);
         background: none;
         border: none;
@@ -1728,7 +1728,6 @@ main {
         font-size: 20px;
         cursor: pointer;
         padding: 5px;
-        margin-right: 5px;
     }
 
     .hamburger-menu {
