@@ -465,6 +465,38 @@ document.addEventListener('DOMContentLoaded', function() {
             lastScrollTop = scrollTop;
         }
     });
+
+    // Axtarış düyməsi funksionallığı
+    const searchToggleBtn = document.getElementById('searchToggle');
+    const searchBoxHeader = document.getElementById('searchBox');
+    const searchClose = document.getElementById('searchClose');
+
+    if (searchToggleBtn && searchBoxHeader && searchClose) {
+        searchToggleBtn.addEventListener('click', function() {
+            searchBoxHeader.classList.toggle('active');
+            if (searchBoxHeader.classList.contains('active')) {
+                document.getElementById('headerSearchInput').focus();
+            }
+        });
+
+        searchClose.addEventListener('click', function() {
+            searchBoxHeader.classList.remove('active');
+        });
+
+        // ESC düyməsinə basıldıqda axtarış çubuğunu bağla
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && searchBoxHeader.classList.contains('active')) {
+                searchBoxHeader.classList.remove('active');
+            }
+        });
+
+        // Axtarış çubuğu xaricində bir yerə klik edildikdə bağla
+        document.addEventListener('click', function(e) {
+            if (!searchBoxHeader.contains(e.target) && !searchToggleBtn.contains(e.target)) {
+                searchBoxHeader.classList.remove('active');
+            }
+        });
+    }
 });
 
 // Səbət sayını yeniləmə

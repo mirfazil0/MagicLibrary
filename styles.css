@@ -2283,4 +2283,53 @@ main {
 .search-box-header {
     transform: translateY(0);
     transition: transform 0.3s ease-in-out;
+}
+
+.search-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 1rem;
+}
+
+.search-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .search-toggle {
+        display: block;
+    }
+
+    .search-box-header {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        padding: 0.5rem;
+        background-color: #2c3e50;
+        z-index: 999;
+        display: none;
+    }
+
+    .search-box-header.active {
+        display: flex;
+    }
+
+    .search-close {
+        display: block;
+    }
+
+    .search-box-header input {
+        flex: 1;
+    }
 } 
