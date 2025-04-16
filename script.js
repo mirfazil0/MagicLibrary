@@ -445,6 +445,26 @@ document.addEventListener('DOMContentLoaded', function() {
             hamburgerMenu.querySelector('i').className = 'fas fa-bars';
         }
     });
+
+    // Scroll zamanı axtarış çubuğunu gizlətmək üçün
+    let lastScrollTop = 0;
+    const searchBox = document.querySelector('.search-box-header');
+
+    window.addEventListener('scroll', () => {
+        if (window.innerWidth <= 768) { // Yalnız mobil cihazlarda
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop) {
+                // Aşağı scroll
+                searchBox.classList.add('hidden');
+            } else {
+                // Yuxarı scroll
+                searchBox.classList.remove('hidden');
+            }
+            
+            lastScrollTop = scrollTop;
+        }
+    });
 });
 
 // Səbət sayını yeniləmə

@@ -18,8 +18,10 @@ header {
     background-color: #2c3e50;
     padding: 1rem;
     color: white;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    width: 100%;
     z-index: 1000;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
@@ -31,6 +33,7 @@ nav {
     max-width: 1200px;
     margin: 0 auto;
     gap: 1rem;
+    position: relative;
 }
 
 .logo {
@@ -106,10 +109,10 @@ nav {
 
 /* Ana Məzmun */
 main {
+    padding-top: 70px;
     flex: 1;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
 }
 
 /* Slider */
@@ -124,7 +127,8 @@ main {
     justify-content: center;
     color: white;
     text-align: center;
-    margin: -2rem -1rem 2rem -1rem;
+    margin: 0;
+    width: 100%;
 }
 
 .slider-content {
@@ -1983,21 +1987,19 @@ main {
     }
 
     .nav-links {
-        display: none;
         position: fixed;
-        top: 60px;
+        top: 110px;
         left: 0;
         width: 100%;
-        background-color: #1a1a1a;
-        padding: 1rem;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        z-index: 999;
+        background-color: #2c3e50;
+        padding: 0;
+        display: none;
+        flex-direction: column;
+        z-index: 998;
     }
 
     .nav-links.active {
         display: flex;
-        flex-direction: column;
-        align-items: center;
     }
 
     .nav-links li {
@@ -2018,14 +2020,32 @@ main {
 
     /* Search box mobil görünüş */
     .search-box-header {
-        position: relative;
-        width: calc(100% - 100px);
-        margin: 0 auto;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        padding: 0.5rem;
+        background-color: #2c3e50;
+        z-index: 999;
+        order: unset;
+        max-width: unset;
+        margin: 0;
     }
 
     /* Əsas konteyner */
     .container {
-        padding-top: 70px; /* Hamburger menyu üçün yer */
+        padding-top: 110px; /* Hamburger menyu üçün yer */
+    }
+
+    /* Scroll zamanı axtarış çubuğunu gizlət */
+    .search-box-header.hidden {
+        transform: translateY(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .search-box-header {
+        transform: translateY(0);
+        transition: transform 0.3s ease-in-out;
     }
 }
 
@@ -2043,17 +2063,6 @@ main {
 
 .menu-overlay.active {
     display: block;
-}
-
-/* Header-in sabit qalması */
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background-color: #1a1a1a;
-    z-index: 997;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 /* Main content padding */
@@ -2264,4 +2273,14 @@ main {
         flex-direction: column;
         gap: 0;
     }
+}
+
+.search-box-header.hidden {
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.search-box-header {
+    transform: translateY(0);
+    transition: transform 0.3s ease-in-out;
 } 
