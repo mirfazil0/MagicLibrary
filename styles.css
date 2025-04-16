@@ -191,6 +191,7 @@ main {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
     margin: 2rem 0;
+    padding: 1rem;
 }
 
 .book-card {
@@ -201,6 +202,31 @@ main {
     text-align: center;
     transition: all 0.3s ease;
     background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.book-card img {
+    width: 75%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 3px;
+    margin-bottom: 2rem;
+}
+
+.book-card h3 {
+    margin: 0.5rem 0;
+    color: #2c3e50;
+}
+
+.book-card .price {
+    color: #27ae60;
+    font-weight: bold;
+    margin: 0.5rem 0;
 }
 
 .book-header {
@@ -238,6 +264,7 @@ main {
 }
 
 .favorite-btn.active i {
+    color: #e74c3c;
     animation: heartBeat 0.3s ease-in-out;
 }
 
@@ -247,43 +274,37 @@ main {
     100% { transform: scale(1); }
 }
 
-.book-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.book-card img {
-    width: 75%;
-    height: 500px;
-    object-fit: cover;
-    border-radius: 3px;
-    margin-bottom: 2rem;
-}
-
-.book-card h3 {
-    margin: 0.5rem 0;
-    color: #2c3e50;
-}
-
-.book-card .price {
-    color: #27ae60;
-    font-weight: bold;
-    margin: 0.5rem 0;
-}
-
 .add-to-cart {
-    background-color: #2c3e50;
-    color: rgb(255, 255, 255);
+    background-color: #4CAF50;
+    color: white;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    padding: 10px 20px;
+    border-radius: 25px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    font-weight: bold;
+    transition: all 0.3s ease;
     width: 100%;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .add-to-cart:hover {
-    background-color: #030405;
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.add-to-cart:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.add-to-cart i {
+    font-size: 1.1em;
 }
 
 /* Səbət Səhifəsi */

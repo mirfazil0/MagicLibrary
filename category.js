@@ -280,36 +280,62 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadCategory(categoryId) {
     const categoryInfo = categoryData[categoryId];
     
-    // Başlığı yenilə
+    if (!categoryInfo) {
+        document.getElementById('categoryBooks').innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-book-open"></i>
+                <p>Bu kateqoriyada kitab tapılmadı.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Kateqoriya adını göstər
     document.getElementById('categoryTitle').textContent = categoryInfo.title;
     document.title = `${categoryInfo.title} - Magic Library`;
 
+    // Sevimliləri yüklə
+    loadFavorites();
+
     // Kitabları göstər
-    const booksContainer = document.getElementById('categoryBooks');
-    booksContainer.innerHTML = categoryInfo.books.map(book => `
-        <div class="book-card">
-            <div class="book-header">
-                <button class="favorite-btn" data-id="${book.id}">
-                    <i class="far fa-heart"></i>
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const booksHtml = categoryInfo.books.map(book => {
+        const isFavorite = favorites.some(f => f.id === book.id);
+        return `
+            <div class="book-card">
+                <div class="book-header">
+                    <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${book.id}">
+                        <i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>
+                    </button>
+                </div>
+                <img src="${book.image}" alt="${book.name}" class="book-image">
+                <h3>${book.name}</h3>
+                <p class="author">${book.author}</p>
+                <div class="price-info">
+                    <p class="price">${book.price.toFixed(2)} AZN</p>
+                </div>
+                <div class="rating-info">
+                    <div class="rating">
+                        ${generateStars(book.rating)}
+                        <span class="rating-text">${book.rating}</span>
+                    </div>
+                    <span class="review-count">(${book.reviewCount} şərh)</span>
+                </div>
+                <button class="add-to-cart" data-id="${book.id}">
+                    <i class="fas fa-shopping-cart"></i> Səbətə Əlavə Et
                 </button>
             </div>
-            <img src="${book.image}" alt="${book.name}">
-            <h3>${book.name}</h3>
-            <p class="author">${book.author}</p>
-            <p class="price">${book.price} AZN</p>
-            <div class="rating-info">
-                <div class="rating">
-                    ${generateStars(book.rating)}
-                    <span class="rating-text">${book.rating}</span>
-                </div>
-                <span class="review-count">(${book.reviewCount} şərh)</span>
-            </div>
-            <button class="add-to-cart" data-id="${book.id}">Səbətə Əlavə Et</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
-    // Event listener-ləri əlavə et
-    initializeButtons();
+    document.getElementById('categoryBooks').innerHTML = `
+        <div class="book-grid">
+            ${booksHtml}
+        </div>
+    `;
+
+    // Event listener-ləri quraşdır
+    setupEventListeners();
 }
 
 // Ulduzları generasiya et
@@ -328,7 +354,7 @@ function generateStars(rating) {
 }
 
 // Düymələri aktivləşdir
-function initializeButtons() {
+function setupEventListeners() {
     // Sevimlilərə əlavə et düyməsi
     document.querySelectorAll('.favorite-btn').forEach(button => {
         button.onclick = () => toggleFavorite(button.getAttribute('data-id'));

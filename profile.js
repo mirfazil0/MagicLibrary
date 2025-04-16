@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Müvəqqəti olaraq random şəkil
         const randomId = Math.floor(Math.random() * 1000);
         document.getElementById('profileAvatar').src = 
-            `https://picsum.photos/150/150?random=${randomId}`;
+            `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWwIJd9oWDTGxUU4bsrCO0yufLNJilmt8uLA&s`;
     });
 
     // Tənzimləmələri yadda saxlamaq üçün
@@ -77,29 +77,6 @@ function loadOrders() {
     const ordersList = document.querySelector('.orders-list');
     if (!ordersList) return;
 
-    // Test üçün nümunə sifarişlər
-    const orders = [
-        {
-            id: '1001',
-            date: '2024-01-15',
-            total: 45.80,
-            status: 'Tamamlandı',
-            items: [
-                { title: '1984', quantity: 1, price: 15.90 },
-                { title: 'Əlkimyaçı', quantity: 2, price: 14.95 }
-            ]
-        },
-        {
-            id: '1002',
-            date: '2024-01-20',
-            total: 22.90,
-            status: 'Göndərilir',
-            items: [
-                { title: 'Cinayət və Cəza', quantity: 1, price: 22.90 }
-            ]
-        }
-    ];
-
     let html = '';
     orders.forEach(order => {
         html += `
@@ -137,24 +114,7 @@ function loadFavorites() {
     const favoritesGrid = document.querySelector('.favorites-grid');
     if (!favoritesGrid) return;
 
-    // Test üçün nümunə sevimli kitablar
-    const favorites = [
-        {
-            id: 1,
-            title: '1984',
-            author: 'George Orwell',
-            price: 15.90,
-            image: 'https://m.media-amazon.com/images/I/81YkqyaFVEL._AC_UF1000,1000_QL80_.jpg'
-        },
-        {
-            id: 2,
-            title: 'Əlkimyaçı',
-            author: 'Paulo Coelho',
-            price: 13.90,
-            image: 'https://i.dr.com.tr/cache/600x600-0/originals/0000000061767-1.jpg'
-        }
-    ];
-
+   
     let html = '';
     favorites.forEach(book => {
         html += `

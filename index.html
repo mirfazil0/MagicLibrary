@@ -23,15 +23,15 @@
             <button class="hamburger-menu" id="hamburgerMenu">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="search-box-header" id="searchBox">
-                <input type="text" id="headerSearchInput" placeholder="Kitab adı, müəllif və ya açar söz...">
-                <button id="headerSearchButton">
+            <form action="search.html" method="get" class="search-box-header">
+                <input type="text" name="q" placeholder="Kitab axtar..." class="search-input">
+                <button type="submit" class="search-button">
                     <i class="fas fa-search"></i>
                 </button>
-                <button class="search-close" id="searchClose">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+            </form>
+            <button class="search-close" id="searchClose">
+                <i class="fas fa-times"></i>
+            </button>
             <ul class="nav-links" id="navLinks">
                 <li><a href="index.html" class="active">Ana Səhifə</a></li>
                 <li><a href="search.html"><i class="fas fa-search"></i> Axtarış</a></li>
@@ -53,152 +53,16 @@
         <!-- Çox Satılanlar Bölməsi -->
         <section class="bestsellers" id="bestsellers">
             <h2>Ayın Ən Çox Satılanları</h2>
-            <div class="book-grid">
-                <div class="book-card">
-                    <div class="book-header">
-                        <button class="favorite-btn" data-id="1984">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <img src="https://m.media-amazon.com/images/I/418Ug-5U2ML._SY445_SX342_.jpg" alt="1984">
-                    <h3>1984</h3>
-                    <p class="author">George Orwell</p>
-                    <p class="price">15.90 AZN</p>
-                    <div class="rating-info">
-                        <div class="rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
-                            <span class="rating-text">4.0</span>
-                        </div>
-                        <span class="review-count">(125 şərh)</span>
-                    </div>
-                    <button class="add-to-cart" data-id="1984">Səbətə Əlavə Et</button>
-                </div>
-                <div class="book-card">
-                    <div class="book-header">
-                        <button class="favorite-btn" data-id="cinayetceza">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <img src="https://m.media-amazon.com/images/I/91y4Xf0a7pL._SY522_.jpg" alt="Cinayət və Cəza">
-                    <h3>Cinayət və Cəza</h3>
-                    <p class="author">Fyodor Dostoyevski</p>
-                    <p class="price">22.90 AZN</p>
-                    <div class="rating-info">
-                        <div class="rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <span class="rating-text">4.5</span>
-                        </div>
-                        <span class="review-count">(98 şərh)</span>
-                    </div>
-                    <button class="add-to-cart" data-id="cinayetceza">Səbətə Əlavə Et</button>
-                </div>
-                <div class="book-card">
-                    <div class="book-header">
-                        <button class="favorite-btn" data-id="portaqal">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <img src="https://m.media-amazon.com/images/I/71uaI1psJpL._SY466_.jpg" alt="Portağal Şirinliyi">
-                    <h3>Portağal Şirinliyi</h3>
-                    <p class="author">Jose Mauro De Vasconcelos</p>
-                    <p class="price">12.90 AZN</p>
-                    <div class="rating-info">
-                        <div class="rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <span class="rating-text">4.3</span>
-                        </div>
-                        <span class="review-count">(87 şərh)</span>
-                    </div>
-                    <button class="add-to-cart" data-id="portaqal">Səbətə Əlavə Et</button>
-                </div>
+            <div class="book-grid" id="bestsellersGrid">
+                <!-- Kitablar script.js-dən dinamik olaraq əlavə olunacaq -->
             </div>
         </section>
 
         <!-- Bəyənə Biləcəkləriniz Bölməsi -->
         <section class="recommended" id="recommended">
             <h2>Bəyənə Biləcəkləriniz</h2>
-            <div class="book-grid">
-                <div class="book-card">
-                    <div class="book-header">
-                        <button class="favorite-btn" data-id="heyvanistan">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <img src="https://m.media-amazon.com/images/I/71je3-DsQEL._SY522_.jpg" alt="Heyvanıstan">
-                    <h3>Heyvanıstan</h3>
-                    <p class="author">George Orwell</p>
-                    <p class="price">14.90 AZN</p>
-                    <div class="rating-info">
-                        <div class="rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <span class="rating-text">4.6</span>
-                        </div>
-                        <span class="review-count">(142 şərh)</span>
-                    </div>
-                    <button class="add-to-cart" data-id="heyvanistan">Səbətə Əlavə Et</button>
-                </div>
-                <div class="book-card">
-                    <div class="book-header">
-                        <button class="favorite-btn" data-id="elkimyaci">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <img src="https://m.media-amazon.com/images/I/51bDuU2p5zL._SY445_SX342_.jpg" alt="Əlkimyaçı">
-                    <h3>Əlkimyaçı</h3>
-                    <p class="author">Paulo Coelho</p>
-                    <p class="price">16.90 AZN</p>
-                    <div class="rating-info">
-                        <div class="rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <span class="rating-text">4.6</span>
-                        </div>
-                        <span class="review-count">(167 şərh)</span>
-                    </div>
-                    <button class="add-to-cart" data-id="elkimyaci">Səbətə Əlavə Et</button>
-                </div>
-                <div class="book-card">
-                    <div class="book-header">
-                        <button class="favorite-btn" data-id="balacasahzade">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    <img src="https://m.media-amazon.com/images/I/71OZY035QKL._SY385_.jpg" alt="Balaca Şahzadə">
-                    <h3>Balaca Şahzadə</h3>
-                    <p class="author">Antoine de Saint-Exupéry</p>
-                    <p class="price">11.90 AZN</p>
-                    <div class="rating-info">
-                        <div class="rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <span class="rating-text">4.9</span>
-                        </div>
-                        <span class="review-count">(203 şərh)</span>
-                    </div>
-                    <button class="add-to-cart" data-id="balacasahzade">Səbətə Əlavə Et</button>
-                </div>
+            <div class="book-grid" id="recommendedGrid">
+                <!-- Kitablar script.js-dən dinamik olaraq əlavə olunacaq -->
             </div>
         </section>
 
