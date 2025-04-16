@@ -339,7 +339,7 @@ function displaySearchResults(books) {
 function toggleFavorite(bookId) {
     const user = firebase.auth().currentUser;
     if (!user) {
-        window.location.href = 'login.html';
+        alert('Zəhmət olmasa əvvəlcə daxil olun');
         return;
     }
 
@@ -375,7 +375,7 @@ function toggleFavorite(bookId) {
 function addToCart(bookId) {
     const user = firebase.auth().currentUser;
     if (!user) {
-        window.location.href = 'login.html';
+        alert('Zəhmət olmasa əvvəlcə daxil olun');
         return;
     }
 

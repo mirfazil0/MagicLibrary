@@ -1719,7 +1719,7 @@ main {
 
     .search-toggle {
         position: absolute;
-        right: 80px;
+        right: 65px;
         top: 55%;
         transform: translateY(-50%);
         background: none;
