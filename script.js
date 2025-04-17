@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Axtarış düyməsi funksionallığı
     const searchToggleBtn = document.getElementById('searchToggle');
-    const searchBoxHeader = document.getElementById('searchBox');
+    const searchBoxHeader = document.querySelector('.search-box-header');
     const searchClose = document.getElementById('searchClose');
 
     if (searchToggleBtn && searchBoxHeader && searchClose) {
