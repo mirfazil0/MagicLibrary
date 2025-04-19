@@ -1634,16 +1634,25 @@ main {
     font-size: 1.5rem;
     color: #fff;
     cursor: pointer;
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 1000;
     padding: 0.5rem;
 }
 
-/* X düyməsini gizlət */
-.close-menu {
+/* Bütün X düymələrini gizlət */
+.menu-close,
+.close-menu,
+.search-close,
+.nav-close,
+.menu-toggle .close,
+nav .close-button,
+.close-button,
+button[aria-label="close"] {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    pointer-events: none !important;
 }
 
 @media screen and (max-width: 768px) {
@@ -1661,11 +1670,35 @@ main {
         padding: 5px;
     }
 
-    /* X düyməsini sil */
-    .menu-toggle .close,
+    .search-toggle {
+        position: absolute;
+        right: 45px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    /* Mobil görünüşdə də X düymələrini gizlət */
+    .menu-close,
+    .close-menu,
+    .search-close,
     .nav-close,
-    .menu-close {
+    .menu-toggle .close,
+    nav .close-button,
+    .close-button,
+    button[aria-label="close"] {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        position: absolute !important;
+        pointer-events: none !important;
     }
 
     .nav-links {
@@ -1732,7 +1765,7 @@ main {
 
     .search-toggle {
         position: absolute;
-        right: 65px;
+        right: 45px;
         top: 50%;
         transform: translateY(-50%);
         background: none;
@@ -1745,7 +1778,7 @@ main {
 
     .hamburger-menu {
         position: absolute;
-        right: 20px;
+        right: 15px;
         top: 50%;
         transform: translateY(-50%);
         background: none;
